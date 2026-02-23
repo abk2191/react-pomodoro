@@ -50,6 +50,25 @@
   cursor: pointer;
 }
 
+.total-time-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: "Inter", sans-serif;
+  font-size: 15px;
+  color: white;
+}
+
+.clear-timer-button {
+  height: 28px;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  color: white;
+  background-color: gray;
+  border: 1px solid gray;
+}
+
 .timeDisplay {
   font-family: "Inter", sans-serif;
   font-size: 40px;
@@ -57,5 +76,5 @@
 }
 
 body {
-  background-color: black;
+  background-color: #1a1a1a;
 }

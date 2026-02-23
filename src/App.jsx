@@ -1,14 +1,60 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 function App() {
   const [width, setWidth] = useState(280);
   const [displayTime, setDisplayTime] = useState("");
   const [showTimerButtons, setShowTimerButtons] = useState(true);
-
+  const [totaltime, setTotalTime] = useState(null);
   // Use refs to store interval IDs so they persist across renders
   const widthIntervalRef = useRef(null);
   const timerIntervalRef = useRef(null);
   const timeoutRef = useRef(null);
+
+  // Load totaltime from localStorage on component mount
+  useEffect(() => {
+    const savedTime = localStorage.getItem("pomodoroTotalTime");
+    if (savedTime) {
+      setTotalTime(parseInt(savedTime, 10));
+    }
+  }, []);
+
+  // Save totaltime to localStorage whenever it changes
+  useEffect(() => {
+    if (totaltime !== null) {
+      localStorage.setItem("pomodoroTotalTime", totaltime.toString());
+    }
+  }, [totaltime]);
+
+  function showTime(minutes) {
+    if (minutes < 60) {
+      return `${minutes} minute${minutes !== 1 ? "s" : ""}`;
+    } else {
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = minutes % 60;
+
+      if (remainingMinutes === 0) {
+        return `${hours} hour${hours !== 1 ? "s" : ""}`;
+      } else {
+        return `${hours} hour${hours !== 1 ? "s" : ""} ${remainingMinutes} minute${remainingMinutes !== 1 ? "s" : ""}`;
+      }
+    }
+  }
+
+  function clearTimer() {
+    // Clear all intervals and timeouts
+    if (widthIntervalRef.current) clearInterval(widthIntervalRef.current);
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+    // Reset to default values
+    setWidth(280);
+    setDisplayTime("");
+    setShowTimerButtons(true);
+
+    // Clear localStorage and set totaltime to 0
+    localStorage.removeItem("pomodoroTotalTime");
+    setTotalTime(0);
+  }
 
   function startTimer(min) {
     // Clear any existing intervals/timeouts
@@ -42,7 +88,6 @@ function App() {
 
     timeoutRef.current = setTimeout(() => {
       clearInterval(widthIntervalRef.current);
-      setShowTimerButtons(true);
     }, totalMilliseconds);
   }
 
@@ -69,7 +114,11 @@ function App() {
       setDisplayTime(formattedTime);
 
       if (totalSeconds <= 0) {
+        setWidth(0); // force final state
         setDisplayTime("✅️ Completed!");
+        setShowTimerButtons(true);
+        setTotalTime((prev) => (prev ? prev + min : min));
+        clearInterval(widthIntervalRef.current); // stop shrinking
         clearInterval(timerIntervalRef.current);
       }
     }, 1000);
@@ -93,6 +142,13 @@ function App() {
   return (
     <>
       <div className="container">
+        <div className="total-time-display">
+          <h3>POMODORO Timer</h3>
+          <p>Time Completed: {totaltime ? showTime(totaltime) : "0 minutes"}</p>
+          <button className="clear-timer-button" onClick={clearTimer}>
+            Clear Timer
+          </button>
+        </div>
         <div className="timer-display">
           <h1 className="timeDisplay">{displayTime}</h1>
         </div>
