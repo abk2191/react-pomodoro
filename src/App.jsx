@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 
 function App() {
-  const [width, setWidth] = useState(400);
+  const [width, setWidth] = useState(280);
   const [displayTime, setDisplayTime] = useState("");
   const [showTimerButtons, setShowTimerButtons] = useState(true);
 
@@ -16,7 +16,7 @@ function App() {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
     // Reset width to 400px
-    setWidth(400);
+    setWidth(280);
     setShowTimerButtons(false);
 
     let decreaseAmount;
