@@ -19,7 +19,7 @@
 .inner-wrapper {
   height: 10px;
   background-color: midnightblue;
-  transition: width 1s linear;
+  /* transition: width 1s linear; */
   border-radius: 15px;
 }
 
@@ -42,10 +42,10 @@
   height: 70px;
   width: 70px;
   border-radius: 50%;
-  background-color: green;
+  background-color: white;
   font-family: "Inter", sans-serif;
-  color: white;
-  font-weight: bold;
+  color: midnightblue;
+  /* font-weight: bold; */
   border: none;
   cursor: pointer;
 }
@@ -53,7 +53,7 @@
 .timeDisplay {
   font-family: "Inter", sans-serif;
   font-size: 40px;
-  color: green;
+  color: white;
 }
 
 body {

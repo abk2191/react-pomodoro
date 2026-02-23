@@ -23,13 +23,13 @@ function App() {
     let totalMilliseconds;
 
     if (min === 5) {
-      decreaseAmount = 400 / 300;
+      decreaseAmount = 280 / 300;
       totalMilliseconds = 300000;
     } else if (min === 15) {
-      decreaseAmount = 400 / 900;
+      decreaseAmount = 280 / 900;
       totalMilliseconds = 900000;
     } else {
-      decreaseAmount = 400 / 1800;
+      decreaseAmount = 280 / 1800;
       totalMilliseconds = 1800000;
     }
 
@@ -82,7 +82,7 @@ function App() {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
     // Reset to default values
-    setWidth(400);
+    setWidth(280);
     setDisplayTime("");
 
     // Start fresh
