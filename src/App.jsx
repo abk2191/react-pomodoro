@@ -5,19 +5,19 @@ const FULL_WIDTH = 280;
 /* -------------------- messages -------------------- */
 
 const HALF_WAY_MESSAGES = [
-  "Halfway there.",
-  "You're halfway done.",
-  "50% completed.",
-  "Nice, halfway through.",
-  "Half the work is done.",
+  "Halfway there",
+  "You're halfway done",
+  "50% completed",
+  "Nice, halfway through",
+  "Half the work is done",
 ];
 
 const ALMOST_THERE_MESSAGES = [
-  "Almost there.",
-  "Final stretch.",
-  "You’re close, keep going.",
-  "Just a little more.",
-  "Nearly done.",
+  "Almost there",
+  "Final stretch",
+  "You’re close, keep going",
+  "Just a little more",
+  "Nearly done",
 ];
 
 function getRandomMessage(arr) {
