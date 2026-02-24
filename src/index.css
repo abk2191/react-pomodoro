@@ -98,6 +98,12 @@ body {
   background-color: black;
 }
 
+body,
+html {
+  overflow-y: hidden;
+  overflow-x: hidden;
+}
+
 .message-container {
   height: 26px; /* Adjust based on your message font size */
   display: flex;
