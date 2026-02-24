@@ -11,8 +11,8 @@
 .wrapper {
   height: 10px;
   width: 280px;
-  background-color: white;
-  border: 2px solid white;
+  background-color: #1a1a1a;
+  border: 2px solid #1a1a1a;
   border-radius: 15px;
 }
 
@@ -24,7 +24,17 @@
 }
 
 .timer-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 35px;
   height: 150px;
+}
+
+.timer-display p {
+  margin: 0;
+  padding: 0;
 }
 
 .placeholder {
@@ -42,9 +52,9 @@
   height: 70px;
   width: 70px;
   border-radius: 50%;
-  background-color: white;
+  background-color: #1a1a1a;
   font-family: "Inter", sans-serif;
-  color: midnightblue;
+  color: #5c5ca1;
   /* font-weight: bold; */
   border: none;
   cursor: pointer;
@@ -55,26 +65,53 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+.total-time-display h3 {
   font-family: "Inter", sans-serif;
   font-size: 15px;
-  color: white;
+  color: midnightblue;
+}
+
+.total-time-display p {
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  color: #5c5ca1;
 }
 
 .clear-timer-button {
   height: 28px;
   font-family: "Inter", sans-serif;
   font-size: 14px;
-  color: white;
-  background-color: gray;
-  border: 1px solid gray;
+  color: #5c5ca1;
+  background-color: #1a1a1a;
+  border: 1px solid #1a1a1a;
 }
 
 .timeDisplay {
   font-family: "Inter", sans-serif;
   font-size: 40px;
-  color: white;
+  color: #32327a;
 }
 
 body {
-  background-color: #1a1a1a;
+  background-color: black;
+}
+
+.message-container {
+  height: 26px; /* Adjust based on your message font size */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.milestone-message {
+  margin: 0;
+  padding: 0;
+  font-family: "Inter", sans-serif;
+  color: white;
+  font-size: 16px;
+  opacity: 0.8;
+  animation: zoomIn; /* referring directly to the animation's @keyframe declaration */
+  animation-duration: 0.5s; /* don't forget to set a duration! */
 }

@@ -1,186 +1,204 @@
 import { useState, useRef, useEffect } from "react";
 
+const FULL_WIDTH = 280;
+
+/* -------------------- messages -------------------- */
+
+const HALF_WAY_MESSAGES = [
+  "Halfway there.",
+  "You're halfway done.",
+  "50% completed.",
+  "Nice, halfway through.",
+  "Half the work is done.",
+];
+
+const ALMOST_THERE_MESSAGES = [
+  "Almost there.",
+  "Final stretch.",
+  "You’re close, keep going.",
+  "Just a little more.",
+  "Nearly done.",
+];
+
+function getRandomMessage(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
 function App() {
-  const [width, setWidth] = useState(280);
+  const [width, setWidth] = useState(FULL_WIDTH);
   const [displayTime, setDisplayTime] = useState("");
+  const [message, setMessage] = useState("");
   const [showTimerButtons, setShowTimerButtons] = useState(true);
   const [totaltime, setTotalTime] = useState(null);
-  // Use refs to store interval IDs so they persist across renders
-  const widthIntervalRef = useRef(null);
-  const timerIntervalRef = useRef(null);
-  const timeoutRef = useRef(null);
 
-  // Load totaltime from localStorage on component mount
+  const intervalRef = useRef(null);
+  const startTimeRef = useRef(null);
+  const endTimeRef = useRef(null);
+  const durationMsRef = useRef(null);
+  const sessionMinutesRef = useRef(null);
+
+  const halfwayRef = useRef(false);
+  const almostThereRef = useRef(false);
+  const messageTimeoutRef = useRef(null);
+
+  /* -------------------- persistence -------------------- */
+
   useEffect(() => {
-    const savedTime = localStorage.getItem("pomodoroTotalTime");
-    if (savedTime) {
-      setTotalTime(parseInt(savedTime, 10));
-    }
+    const saved = localStorage.getItem("pomodoroTotalTime");
+    if (saved) setTotalTime(parseInt(saved, 10));
   }, []);
 
-  // Save totaltime to localStorage whenever it changes
   useEffect(() => {
     if (totaltime !== null) {
       localStorage.setItem("pomodoroTotalTime", totaltime.toString());
     }
   }, [totaltime]);
 
+  /* -------------------- helpers -------------------- */
+
   function showTime(minutes) {
     if (minutes < 60) {
       return `${minutes} minute${minutes !== 1 ? "s" : ""}`;
-    } else {
-      const hours = Math.floor(minutes / 60);
-      const remainingMinutes = minutes % 60;
-
-      if (remainingMinutes === 0) {
-        return `${hours} hour${hours !== 1 ? "s" : ""}`;
-      } else {
-        return `${hours} hour${hours !== 1 ? "s" : ""} ${remainingMinutes} minute${remainingMinutes !== 1 ? "s" : ""}`;
-      }
     }
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return m === 0
+      ? `${h} hour${h !== 1 ? "s" : ""}`
+      : `${h} hour${h !== 1 ? "s" : ""} ${m} minute${m !== 1 ? "s" : ""}`;
+  }
+
+  function showTempMessage(text) {
+    setMessage(text);
+
+    if (messageTimeoutRef.current) {
+      clearTimeout(messageTimeoutRef.current);
+    }
+
+    messageTimeoutRef.current = setTimeout(() => {
+      setMessage("");
+    }, 3000);
   }
 
   function clearTimer() {
-    // Clear all intervals and timeouts
-    if (widthIntervalRef.current) clearInterval(widthIntervalRef.current);
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (messageTimeoutRef.current) clearTimeout(messageTimeoutRef.current);
 
-    // Reset to default values
-    setWidth(280);
+    setWidth(FULL_WIDTH);
     setDisplayTime("");
+    setMessage("");
     setShowTimerButtons(true);
 
-    // Clear localStorage and set totaltime to 0
     localStorage.removeItem("pomodoroTotalTime");
     setTotalTime(0);
   }
 
-  function startTimer(min) {
-    // Clear any existing intervals/timeouts
-    if (widthIntervalRef.current) clearInterval(widthIntervalRef.current);
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+  /* -------------------- core logic -------------------- */
 
-    // Reset width to 400px
-    setWidth(280);
+  function startPomodoro(min) {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (messageTimeoutRef.current) clearTimeout(messageTimeoutRef.current);
+
+    const now = Date.now();
+
+    startTimeRef.current = now;
+    durationMsRef.current = min * 60 * 1000;
+    endTimeRef.current = now + durationMsRef.current;
+    sessionMinutesRef.current = min;
+
+    halfwayRef.current = false;
+    almostThereRef.current = false;
+
+    setMessage("");
     setShowTimerButtons(false);
+    setDisplayTime(`${min}:00`);
+    setWidth(FULL_WIDTH);
 
-    let decreaseAmount;
-    let totalMilliseconds;
+    intervalRef.current = setInterval(tick, 250);
+  }
 
-    if (min === 5) {
-      decreaseAmount = 280 / 300;
-      totalMilliseconds = 300000;
-    } else if (min === 15) {
-      decreaseAmount = 280 / 900;
-      totalMilliseconds = 900000;
-    } else {
-      decreaseAmount = 280 / 1800;
-      totalMilliseconds = 1800000;
+  function tick() {
+    const now = Date.now();
+    const remainingMs = endTimeRef.current - now;
+
+    if (remainingMs <= 0) {
+      finishPomodoro();
+      return;
     }
 
-    widthIntervalRef.current = setInterval(() => {
-      setWidth((prev) => {
-        const newWidth = prev - decreaseAmount;
-        return newWidth < 0 ? 0 : newWidth;
-      });
-    }, 1000);
+    const progress = remainingMs / durationMsRef.current;
 
-    timeoutRef.current = setTimeout(() => {
-      clearInterval(widthIntervalRef.current);
-    }, totalMilliseconds);
+    // ⏳ Halfway (50%)
+    if (progress <= 0.5 && !halfwayRef.current) {
+      halfwayRef.current = true;
+      showTempMessage(getRandomMessage(HALF_WAY_MESSAGES));
+    }
+
+    // 🔥 Almost there (33% left)
+    if (progress <= 1 / 3 && !almostThereRef.current) {
+      almostThereRef.current = true;
+      showTempMessage(getRandomMessage(ALMOST_THERE_MESSAGES));
+    }
+
+    const totalSeconds = Math.ceil(remainingMs / 1000);
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    setDisplayTime(`${mins}:${secs < 10 ? "0" + secs : secs}`);
+
+    setWidth(FULL_WIDTH * progress);
   }
 
-  function countdownTimer(min) {
-    // Clear any existing timer interval
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+  function finishPomodoro() {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (messageTimeoutRef.current) clearTimeout(messageTimeoutRef.current);
 
-    // Reset display time
-    setDisplayTime("");
-
-    let totalSeconds = min * 60;
-
-    // Display initial time
-    const initialFormatted = `${min}:00`;
-    setDisplayTime(initialFormatted);
-
-    timerIntervalRef.current = setInterval(() => {
-      totalSeconds -= 1;
-
-      const mins = Math.floor(totalSeconds / 60);
-      const secs = totalSeconds % 60;
-      const formattedTime = `${mins}:${secs < 10 ? "0" + secs : secs}`;
-
-      setDisplayTime(formattedTime);
-
-      if (totalSeconds <= 0) {
-        setWidth(0); // force final state
-        setDisplayTime("✅️ Completed!");
-        setShowTimerButtons(true);
-        setTotalTime((prev) => (prev ? prev + min : min));
-        clearInterval(widthIntervalRef.current); // stop shrinking
-        clearInterval(timerIntervalRef.current);
-      }
-    }, 1000);
+    setWidth(0);
+    setDisplayTime("✅ Completed!");
+    setMessage("");
+    setShowTimerButtons(true);
+    setTotalTime((prev) =>
+      prev ? prev + sessionMinutesRef.current : sessionMinutesRef.current,
+    );
   }
 
-  function handleButtonClick(min) {
-    // Clear both timers and reset everything
-    if (widthIntervalRef.current) clearInterval(widthIntervalRef.current);
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-
-    // Reset to default values
-    setWidth(280);
-    setDisplayTime("");
-
-    // Start fresh
-    startTimer(min);
-    countdownTimer(min);
-  }
+  /* -------------------- UI -------------------- */
 
   return (
-    <>
-      <div className="container">
-        <div className="total-time-display">
-          <h3>POMODORO Timer</h3>
-          <p>Time Completed: {totaltime ? showTime(totaltime) : "0 minutes"}</p>
-          <button className="clear-timer-button" onClick={clearTimer}>
-            Clear Timer
-          </button>
-        </div>
-        <div className="timer-display">
-          <h1 className="timeDisplay">{displayTime}</h1>
-        </div>
-        <div className="wrapper">
-          <div className="inner-wrapper" style={{ width: width }}></div>
-        </div>
-        <div className="placeholder">
-          {showTimerButtons && (
-            <div className="time-buttons-div">
-              <button
-                className="time-buttons"
-                onClick={() => handleButtonClick(5)}
-              >
-                5 min
-              </button>
-              <button
-                className="time-buttons"
-                onClick={() => handleButtonClick(15)}
-              >
-                15 min
-              </button>
-              <button
-                className="time-buttons"
-                onClick={() => handleButtonClick(30)}
-              >
-                30 min
-              </button>
-            </div>
-          )}
+    <div className="container">
+      <div className="total-time-display">
+        <h3>POMODORO</h3>
+        <p>Time Completed: {totaltime ? showTime(totaltime) : "0 minutes"}</p>
+        <button className="clear-timer-button" onClick={clearTimer}>
+          Clear Timer
+        </button>
+      </div>
+
+      <div className="timer-display">
+        <h1 className="timeDisplay">{displayTime}</h1>
+        <div className="message-container">
+          {message && <p className="milestone-message">{message}</p>}
         </div>
       </div>
-    </>
+
+      <div className="wrapper">
+        <div className="inner-wrapper" style={{ width }} />
+      </div>
+
+      <div className="placeholder">
+        {showTimerButtons && (
+          <div className="time-buttons-div">
+            <button className="time-buttons" onClick={() => startPomodoro(5)}>
+              5 min
+            </button>
+            <button className="time-buttons" onClick={() => startPomodoro(15)}>
+              15 min
+            </button>
+            <button className="time-buttons" onClick={() => startPomodoro(30)}>
+              30 min
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
