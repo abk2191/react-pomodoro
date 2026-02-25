@@ -98,6 +98,10 @@ body {
   background-color: black;
 }
 
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
 body,
 html {
   overflow-y: hidden;
