@@ -18,7 +18,7 @@
 
 .inner-wrapper {
   height: 10px;
-  background-color: #5c5ca1;
+  background-color: #7171a3;
   /* transition: width 1s linear; */
   border-radius: 15px;
 }
@@ -54,7 +54,7 @@
   border-radius: 50%;
   background-color: #1a1a1a;
   font-family: "Inter", sans-serif;
-  color: #5c5ca1;
+  color: #7171a3;
   /* font-weight: bold; */
   border: none;
   cursor: pointer;
@@ -70,20 +70,20 @@
 .total-time-display h3 {
   font-family: "Inter", sans-serif;
   font-size: 15px;
-  color: #5c5ca1;
+  color: #7171a3;
 }
 
 .total-time-display p {
   font-family: "Inter", sans-serif;
   font-size: 12px;
-  color: #5c5ca1;
+  color: #7171a3;
 }
 
 .clear-timer-button {
   height: 28px;
   font-family: "Inter", sans-serif;
   font-size: 14px;
-  color: #5c5ca1;
+  color: #7171a3;
   background-color: #1a1a1a;
   border: 1px solid #1a1a1a;
 }
@@ -91,7 +91,7 @@
 .timeDisplay {
   font-family: "Inter", sans-serif;
   font-size: 40px;
-  color: #32327a;
+  color: #7171a3;
 }
 
 body {

@@ -30,12 +30,15 @@ function App() {
   const [message, setMessage] = useState("");
   const [showTimerButtons, setShowTimerButtons] = useState(true);
   const [totaltime, setTotalTime] = useState(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   const intervalRef = useRef(null);
   const startTimeRef = useRef(null);
   const endTimeRef = useRef(null);
   const durationMsRef = useRef(null);
   const sessionMinutesRef = useRef(null);
+
+  const remainingMsRef = useRef(null); // 👈 NEW (Model 2 core)
 
   const halfwayRef = useRef(false);
   const almostThereRef = useRef(false);
@@ -87,6 +90,7 @@ function App() {
     setDisplayTime("");
     setMessage("");
     setShowTimerButtons(true);
+    setIsPaused(false);
 
     localStorage.removeItem("pomodoroTotalTime");
     setTotalTime(0);
@@ -100,14 +104,15 @@ function App() {
 
     const now = Date.now();
 
-    startTimeRef.current = now;
     durationMsRef.current = min * 60 * 1000;
     endTimeRef.current = now + durationMsRef.current;
+    remainingMsRef.current = durationMsRef.current;
     sessionMinutesRef.current = min;
 
     halfwayRef.current = false;
     almostThereRef.current = false;
 
+    setIsPaused(false);
     setMessage("");
     setShowTimerButtons(false);
     setDisplayTime(`${min}:00`);
@@ -116,9 +121,31 @@ function App() {
     intervalRef.current = setInterval(tick, 250);
   }
 
+  function pausePomodoro() {
+    if (!intervalRef.current) return;
+
+    const now = Date.now();
+    remainingMsRef.current = endTimeRef.current - now;
+
+    clearInterval(intervalRef.current);
+    intervalRef.current = null;
+
+    setIsPaused(true);
+  }
+
+  function resumePomodoro() {
+    if (!isPaused || remainingMsRef.current <= 0) return;
+
+    endTimeRef.current = Date.now() + remainingMsRef.current;
+    setIsPaused(false);
+
+    intervalRef.current = setInterval(tick, 250);
+  }
+
   function tick() {
     const now = Date.now();
     const remainingMs = endTimeRef.current - now;
+    remainingMsRef.current = remainingMs;
 
     if (remainingMs <= 0) {
       finishPomodoro();
@@ -155,6 +182,8 @@ function App() {
     setDisplayTime("✅ Completed!");
     setMessage("");
     setShowTimerButtons(true);
+    setIsPaused(false);
+
     setTotalTime((prev) =>
       prev ? prev + sessionMinutesRef.current : sessionMinutesRef.current,
     );
@@ -184,7 +213,7 @@ function App() {
       </div>
 
       <div className="placeholder">
-        {showTimerButtons && (
+        {showTimerButtons ? (
           <div className="time-buttons-div">
             <button className="time-buttons" onClick={() => startPomodoro(5)}>
               5 min
@@ -195,6 +224,18 @@ function App() {
             <button className="time-buttons" onClick={() => startPomodoro(30)}>
               30 min
             </button>
+          </div>
+        ) : (
+          <div className="time-buttons-div">
+            {!isPaused ? (
+              <button className="time-buttons" onClick={pausePomodoro}>
+                Pause
+              </button>
+            ) : (
+              <button className="time-buttons" onClick={resumePomodoro}>
+                Resume
+              </button>
+            )}
           </div>
         )}
       </div>
